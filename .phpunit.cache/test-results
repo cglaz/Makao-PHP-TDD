@@ -1,0 +1,1 @@
+{"version":1,"defects":{"Tests\\Makao\\TableTest::testShouldCreateEmptyTable":5,"Tests\\Makao\\TableTest::testShouldWork":5},"times":{"Tests\\Makao\\TableTest::testShouldCreateEmptyTable":0.005,"Tests\\Makao\\TableTest::testShouldWork":0}}
