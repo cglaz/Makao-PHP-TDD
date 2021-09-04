@@ -4,13 +4,20 @@ namespace Makao\Collection;
 
 use Makao\Card;
 use Makao\Exception\CardNotFoundException;
+use Makao\Exception\MethodNotAllowedException;
 
-class CardCollection implements \Countable, \Iterator
+class CardCollection implements \Countable, \Iterator, \ArrayAccess
 {
     const FIRST_CARD_INDEX = 0;
 
     private $cards = [];
     private $position = 0;
+
+    public function __construct(array $cards = [])
+    {
+        $this->cards = $cards;
+    }
+
 
     /**
      * @inheritdoc
@@ -32,6 +39,12 @@ class CardCollection implements \Countable, \Iterator
         if (empty($this->cards)) {
             throw new CardNotFoundException('You can not pick card from empty CardCollection!');
         }
+
+        $pickedCard = $this->offsetGet(self::FIRST_CARD_INDEX);
+        $this->offsetUnset(self::FIRST_CARD_INDEX);
+        $this->cards = array_values($this->cards);
+
+        return $pickedCard;
     }
 
     /**
@@ -73,4 +86,42 @@ class CardCollection implements \Countable, \Iterator
     {
         $this->position = self::FIRST_CARD_INDEX;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetExists($offset) : bool
+    {
+        return isset($this->cards[$offset]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetGet($offset) : Card
+    {
+        return $this->cards[$offset];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetSet($offset, $value) : void
+    {
+        throw new MethodNotAllowedException('You can not add art to collection as array. Use addCard() method!');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetUnset($offset) : void
+    {
+       unset($this->cards[$offset]);
+    }
+
+    public function toArray() : array
+    {
+        return $this->cards;
+    }
+
 }

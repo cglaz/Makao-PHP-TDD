@@ -2,6 +2,7 @@
 
 namespace Makao;
 
+use Makao\Collection\CardCollection;
 use Makao\Exception\TooManyPlayersAtTheTableException;
 
 class Table
@@ -9,6 +10,22 @@ class Table
     const MAX_PLAYERS = 4;
 
     private $players = [];
+
+    /**
+     * @var CardCollection
+     */
+    private $cardDeck;
+
+    /**
+     * @var CardCollection
+     */
+    private $playedCard;
+
+    public function __construct(CardCollection $cardDeck = null)
+    {
+        $this->cardDeck = $cardDeck ?? new CardCollection();
+        $this->playedCard = new CardCollection();
+    }
 
     public function countPlayers() : int
     {
@@ -21,5 +38,15 @@ class Table
             throw new TooManyPlayersAtTheTableException(self::MAX_PLAYERS);
         }
         $this->players[] = $player;
+    }
+
+    public function getPlayedCards() : CardCollection
+    {
+        return $this->playedCard;
+    }
+
+    public function getCardDeck() : CardCollection
+    {
+        return $this->cardDeck;
     }
 }
