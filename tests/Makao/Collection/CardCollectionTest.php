@@ -124,6 +124,22 @@ class CardCollectionTest extends TestCase
         $this->cardCollection->pickCard();
     }
 
+    public function testShouldReturnChosenCardPickedFromCollection()
+    {
+        // Given
+        $firstCard = new Card(Card::COLOR_CLUB, Card::VALUE_EIGHT);
+        $secondCard = new Card(CARD::COLOR_DIAMOND, Card::VALUE_FIVE);
+        $this->cardCollection
+            ->add($firstCard)
+            ->add($secondCard);
+
+        // When
+        $actual = $this->cardCollection->pickCard(1);
+
+        // Then
+        $this->assertSame($secondCard, $actual);
+    }
+
     public function testShouldThrowMethodNotAllowedExceptionWhenYouTryAddCardToCollectionAsArray()
     {
         // Expect
@@ -151,5 +167,20 @@ class CardCollectionTest extends TestCase
             
         // Then
         $this->assertEquals($cards, $actual->toArray());
+    }
+    
+    public function testShouldAddCardCollectionToCardCollection()
+    {
+        // Given
+        $collection = new CardCollection([
+           new Card(Card::COLOR_CLUB, Card::VALUE_KING),
+           new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE),
+        ]);
+
+        // When
+        $actual = $this->cardCollection->addCollection($collection);
+
+        // Then
+        $this->assertEquals($collection, $actual);
     }
 }

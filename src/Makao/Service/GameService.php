@@ -12,9 +12,13 @@ class GameService
     /** @var bool  */
     private $isStarted = false;
 
-    public function __construct(Table $table = null)
+    /** @var CardService */
+    private $cardService;
+
+    public function __construct(Table $table, CardService $cardService)
     {
-        $this->table = $table ?? new Table();
+        $this->table = $table;
+        $this->cardService = $cardService;
     }
 
     public function isStarted() : bool
@@ -39,5 +43,14 @@ class GameService
     public function startGame() : void
     {
         $this->isStarted = true;
+    }
+
+    public function prepareCardDeck() : Table
+    {
+        $cardCollection = $this->cardService->createDeck();
+        $cardDeck = $this->cardService->shuffle($cardCollection);
+
+
+        return $this->table->addCardCollectionToDeck($cardDeck);
     }
 }

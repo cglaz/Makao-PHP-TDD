@@ -27,21 +27,30 @@ class CardCollection implements \Countable, \Iterator, \ArrayAccess
         return count($this->cards);
     }
 
-    public function add($card) : self
+    public function add(Card $card) : self
     {
         $this->cards[] = $card;
 
         return $this;
     }
 
-    public function pickCard() : Card
+    public function addCollection(CardCollection $cardCollection) : self
+    {
+        foreach ($cardCollection->toArray() as $card) {
+            $this->add($card);
+        }
+
+        return $this;
+    }
+
+    public function pickCard(int $index = self::FIRST_CARD_INDEX) : Card
     {
         if (empty($this->cards)) {
             throw new CardNotFoundException('You can not pick card from empty CardCollection!');
         }
 
-        $pickedCard = $this->offsetGet(self::FIRST_CARD_INDEX);
-        $this->offsetUnset(self::FIRST_CARD_INDEX);
+        $pickedCard = $this->offsetGet($index);
+        $this->offsetUnset($index);
         $this->cards = array_values($this->cards);
 
         return $pickedCard;
@@ -52,7 +61,7 @@ class CardCollection implements \Countable, \Iterator, \ArrayAccess
      */
     public function valid() : bool
     {
-        return isset($this->cards[$this->position]);
+        return $this->offsetExists($this->position);
     }
 
     /**
