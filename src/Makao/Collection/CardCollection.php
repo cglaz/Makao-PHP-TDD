@@ -133,4 +133,12 @@ class CardCollection implements \Countable, \Iterator, \ArrayAccess
         return $this->cards;
     }
 
+    public function getLastCard() : Card
+    {
+        if (0 === $this->count()) {
+            throw new CardNotFoundException('You can not get last card from empty CardCollection!');
+        }
+        return $this->offsetGet($this->count()-1);
+    }
+
 }

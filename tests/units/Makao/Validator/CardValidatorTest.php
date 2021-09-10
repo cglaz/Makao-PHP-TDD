@@ -35,6 +35,16 @@ class CardValidatorTest extends TestCase
                 new Card(Card::COLOR_HEART, Card::VALUE_FIVE),
                 true
             ],
+            'Queens for all' => [
+                new Card(Card::COLOR_DIAMOND, Card::VALUE_TEN),
+                new Card(Card::COLOR_HEART, Card::VALUE_QUEEN),
+                true
+            ],
+            'All for queens' => [
+                new Card(Card::COLOR_HEART, Card::VALUE_QUEEN),
+                new Card(Card::COLOR_DIAMOND, Card::VALUE_TEN),
+                true
+            ],
         ];
     }
 
