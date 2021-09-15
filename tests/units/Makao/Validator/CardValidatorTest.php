@@ -59,7 +59,7 @@ class CardValidatorTest extends TestCase
     public function testShouldValidCards(Card $activeCard, Card $newCard, bool $expected)
     {
         // When
-        $actual = $this->cardValidator->valid($activeCard, $newCard);
+        $actual = $this->cardValidator->valid($activeCard, $newCard, $activeCard->getColor());
 
         // Then
         $this->assertSame($expected, $actual);
@@ -75,6 +75,34 @@ class CardValidatorTest extends TestCase
         $card = new Card(Card::COLOR_SPADE, Card::VALUE_FIVE);
 
         // When
-        $this->cardValidator->valid($card, $card);
+        $this->cardValidator->valid($card, $card, $card->getColor());
+    }
+    
+    public function testShouldReturnTrueWhenAceChangeAcceptColorToDifferent()
+    {
+        // Given
+        $requestedColor = Card::COLOR_HEART;
+        $playedCard = new Card(Card::COLOR_SPADE, Card::VALUE_ACE);
+        $newCard = new Card(Card::COLOR_HEART, Card::VALUE_TEN);
+
+        // When
+        $actual = $this->cardValidator->valid($playedCard, $newCard, $requestedColor);
+            
+        // Then
+        $this->assertTrue($actual);
+    }
+
+    public function testShouldReturnFalseWhenAceChangeAcceptColorToDifferentAndPlayerTryPutTheSameColorCard()
+    {
+        // Given
+        $requestedColor = Card::COLOR_HEART;
+        $playedCard = new Card(Card::COLOR_SPADE, Card::VALUE_ACE);
+        $newCard = new Card(Card::COLOR_SPADE, Card::VALUE_TEN);
+
+        // When
+        $actual = $this->cardValidator->valid($playedCard, $newCard, $requestedColor);
+
+        // Then
+        $this->assertFalse($actual);
     }
 }

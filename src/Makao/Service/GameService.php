@@ -12,11 +12,10 @@ class GameService
     const MINIMAL_PLAYERS = 2;
     const COUNT_START_PLAYER_CARDS = 5;
 
-
     /** @var Table */
     private $table;
 
-    /** @var bool  */
+    /** @var bool */
     private $isStarted = false;
 
     /** @var CardService */
@@ -25,16 +24,15 @@ class GameService
     /** @var CardSelectorInterface */
     private $cardSelector;
 
-    /**@var CardActionService */
+    /** @var CardActionService */
     private $cardActionService;
 
     public function __construct(
         Table $table,
         CardService $cardService,
         CardSelectorInterface $cardSelector,
-        CardActionService $cardActionService,
-    )
-    {
+        CardActionService $cardActionService
+    ) {
         $this->table = $table;
         $this->cardService = $cardService;
         $this->cardSelector = $cardSelector;
@@ -63,12 +61,12 @@ class GameService
     public function startGame() : void
     {
         $this->validateBeforeStartGame();
-        $cardDeck = $this->table->getCardDeck();
 
+        $cardDeck = $this->table->getCardDeck();
         try {
             $this->isStarted = true;
 
-            $card = $this->cardService->pickFirstNoActionCard($this->table->getCardDeck());
+            $card = $this->cardService->pickFirstNoActionCard($cardDeck);
             $this->table->addPlayedCard($card);
 
             foreach ($this->table->getPlayers() as $player) {
@@ -77,7 +75,6 @@ class GameService
         } catch (\Exception $e) {
             throw new GameException('The game needs help!', $e);
         }
-
     }
 
     public function prepareCardDeck() : Table
@@ -88,14 +85,14 @@ class GameService
         return $this->table->addCardCollectionToDeck($cardDeck);
     }
 
-    private function validateBeforeStartGame()
+    private function validateBeforeStartGame() : void
     {
         if (0 === $this->table->getCardDeck()->count()) {
             throw new GameException('Prepare card deck before game start');
         }
 
         if (self::MINIMAL_PLAYERS > $this->table->countPlayers()) {
-            throw new GameException('You need minimum '. self::MINIMAL_PLAYERS .' players to start game');
+            throw new GameException('You need minimum ' . self::MINIMAL_PLAYERS . ' players to start game');
         }
     }
 
@@ -108,15 +105,15 @@ class GameService
         }
 
         try {
-            $card = $this->cardSelector->chooseCard(
+            $selectedCard = $this->cardSelector->chooseCard(
                 $player,
                 $this->table->getPlayedCards()->getLastCard(),
                 $this->table->getPlayedCardColor()
             );
 
-            $this->table->addPlayedCard($card);
+            $this->table->addPlayedCard($selectedCard->getCard());
 
-            $this->cardActionService->afterCard($card);
+            $this->cardActionService->afterCard($selectedCard->getCard(), $selectedCard->getRequest());
         } catch (CardNotFoundException $e) {
             $player->takeCards($this->table->getCardDeck());
             $this->table->finishRound();

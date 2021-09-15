@@ -7,6 +7,7 @@ use Makao\Collection\CardCollection;
 use Makao\Exception\CardNotFoundException;
 use Makao\Exception\GameException;
 use Makao\Player;
+use Makao\SelectedCard;
 use Makao\Service\CardActionService;
 use Makao\Service\CardSelector\CardSelectorInterface;
 use Makao\Service\CardService;
@@ -23,21 +24,17 @@ class GameServiceTest extends TestCase
     /** @var MockObject | CardService $cardServiceMock */
     private $cardServiceMock;
 
-    /**
-     * @var CardActionService|mixed|MockObject
-     */
-    private mixed $actionServiceMock;
-    /**
-     * @var CardSelectorInterface|mixed|MockObject
-     */
-    private mixed $cardSelectorMock;
+    /** @var MockObject | CardActionService */
+    private $actionServiceMock;
+
+    /** @var MockObject | CardSelectorInterface */
+    private $cardSelectorMock;
 
     /**
      * @throws \ReflectionException
      */
     protected function setUp() : void
     {
-
         $this->cardSelectorMock = $this->getMockForAbstractClass(CardSelectorInterface::class);
         $this->actionServiceMock = $this->createMock(CardActionService::class);
         $this->cardServiceMock = $this->createMock(CardService::class);
@@ -45,7 +42,7 @@ class GameServiceTest extends TestCase
             new Table(),
             $this->cardServiceMock,
             $this->cardSelectorMock,
-            $this->actionServiceMock,
+            $this->actionServiceMock
         );
     }
 
@@ -58,8 +55,9 @@ class GameServiceTest extends TestCase
     }
 
     public function testShouldReturnTrueWhenGameIsStarted() {
-        //Given
+        // Given
         $this->gameServiceUnderTest->getTable()->addCardCollectionToDeck(new CardCollection([
+            new Card(Card::COLOR_CLUB, Card::VALUE_FIVE),
             new Card(Card::COLOR_HEART, Card::VALUE_TWO),
             new Card(Card::COLOR_HEART, Card::VALUE_THREE),
             new Card(Card::COLOR_HEART, Card::VALUE_FOUR),
@@ -85,7 +83,7 @@ class GameServiceTest extends TestCase
 
         $this->gameServiceUnderTest->addPlayers([
             new Player('Andy'),
-            new Player('Alex'),
+            new Player('Max'),
         ]);
 
         // When
@@ -166,19 +164,19 @@ class GameServiceTest extends TestCase
 
     public function testShouldThrowGameExceptionWhenStartGameWithoutMinimalPlayers()
     {
+        // Given
+        $this->gameServiceUnderTest->getTable()->addCardCollectionToDeck(new CardCollection([
+            new Card(Card::COLOR_CLUB, Card::VALUE_ACE)
+        ]));
+
         // Expect
         $this->expectException(GameException::class);
         $this->expectExceptionMessage('You need minimum 2 players to start game');
 
-        //Given
-        $this->gameServiceUnderTest->getTable()->addCardCollectionToDeck(new CardCollection([
-            new Card(Card::COLOR_CLUB, Card::VALUE_FIVE)
-        ]));
-
         // When
         $this->gameServiceUnderTest->startGame();
     }
-    
+
     public function testShouldChooseNoActionCardAsFirstPlayedCardWhenStartGame()
     {
         // Given
@@ -186,9 +184,9 @@ class GameServiceTest extends TestCase
         $noActionCard = new Card(Card::COLOR_CLUB, Card::VALUE_FIVE);
 
         $collection = new CardCollection([
-            new Card(Card::COLOR_CLUB, Card::VALUE_TWO),
+            new Card(Card::COLOR_HEART, Card::VALUE_TWO),
             $noActionCard,
-            new Card(Card::COLOR_CLUB, Card::VALUE_FIVE),
+            new Card(Card::COLOR_HEART, Card::VALUE_FIVE),
             new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE),
             new Card(Card::COLOR_HEART, Card::VALUE_TWO),
             new Card(Card::COLOR_HEART, Card::VALUE_THREE),
@@ -213,17 +211,17 @@ class GameServiceTest extends TestCase
             new Card(Card::COLOR_CLUB, Card::VALUE_ACE),
         ]);
 
+        $this->gameServiceUnderTest->addPlayers([
+            new Player('Andy'),
+            new Player('Max'),
+        ]);
+
         $table->addCardCollectionToDeck($collection);
 
         $this->cardServiceMock->expects($this->once())
             ->method('pickFirstNoActionCard')
             ->with($collection)
             ->willReturn($noActionCard);
-
-        $this->gameServiceUnderTest->addPlayers([
-            new Player('Andy'),
-            new Player('Tom'),
-        ]);
 
         // When
         $this->gameServiceUnderTest->startGame();
@@ -245,25 +243,24 @@ class GameServiceTest extends TestCase
         // Given
         $table = $this->gameServiceUnderTest->getTable();
         $collection = new CardCollection([
-            new Card(Card::COLOR_CLUB, Card::VALUE_FIVE),
+            new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE)
         ]);
+        $table->addCardCollectionToDeck($collection);
 
-        $table->addCardCollectionToDeck($collection );
+        $this->gameServiceUnderTest->addPlayers([
+            new Player('Andy'),
+            new Player('Max'),
+        ]);
 
         $this->cardServiceMock->expects($this->once())
             ->method('pickFirstNoActionCard')
             ->with($collection)
             ->willThrowException($notFoundException);
 
-        $this->gameServiceUnderTest->addPlayers([
-            new Player('Andy'),
-            new Player('Tom'),
-        ]);
-
         // When
         $this->gameServiceUnderTest->startGame();
     }
-    
+
     public function testShouldPlayersTakesFiveCardsFromDeckOnStartGame()
     {
         // Given
@@ -275,9 +272,9 @@ class GameServiceTest extends TestCase
         $this->gameServiceUnderTest->addPlayers($players);
 
         $table = $this->gameServiceUnderTest->getTable();
-        $noActionCard = new Card(Card::COLOR_CLUB, Card::VALUE_FIVE);
+        $noActionCard = new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE);
 
-        $cardCollection = new CardCollection([
+        $collection = new CardCollection([
             new Card(Card::COLOR_HEART, Card::VALUE_TWO),
             new Card(Card::COLOR_HEART, Card::VALUE_THREE),
             new Card(Card::COLOR_HEART, Card::VALUE_FOUR),
@@ -302,22 +299,22 @@ class GameServiceTest extends TestCase
             $noActionCard,
         ]);
 
-        $table->addCardCollectionToDeck($cardCollection);
+        $table->addCardCollectionToDeck($collection);
 
         $this->cardServiceMock->expects($this->once())
             ->method('pickFirstNoActionCard')
-            ->with($cardCollection)
+            ->with($collection)
             ->willReturn($noActionCard);
 
         // When
         $this->gameServiceUnderTest->startGame();
-            
+
         // Then
         foreach ($players as $player) {
             $this->assertCount(5, $player->getCards());
         }
     }
-    
+
     public function testShouldChooseCardToPlayFromPlayerCardsAndPutItOnTheTable()
     {
         // Given
@@ -341,15 +338,14 @@ class GameServiceTest extends TestCase
             new Card(Card::COLOR_HEART, Card::VALUE_THREE),
             new Card(Card::COLOR_HEART, Card::VALUE_FOUR),
             new Card(Card::COLOR_HEART, Card::VALUE_JACK),
-            new Card(Card::COLOR_HEART, Card::VALUE_QUEEN),
-            new Card(Card::COLOR_HEART, Card::VALUE_KING),
-            new Card(Card::COLOR_HEART, Card::VALUE_ACE),
         ]);
+
+        $table->addCardCollectionToDeck($collection);
 
         $this->cardSelectorMock->expects($this->once())
             ->method('chooseCard')
             ->with($player1, $playedCard, $table->getPlayedCardColor())
-            ->willReturn($correctCard);
+            ->willReturn(new SelectedCard($correctCard));
 
         $this->actionServiceMock->expects($this->once())
             ->method('afterCard')
@@ -357,7 +353,7 @@ class GameServiceTest extends TestCase
 
         // When
         $this->gameServiceUnderTest->playRound();
-            
+
         // Then
         $this->assertSame($correctCard, $table->getPlayedCards()->getLastCard());
     }
@@ -382,8 +378,7 @@ class GameServiceTest extends TestCase
             new Card(Card::COLOR_HEART, Card::VALUE_TWO),
             new Card(Card::COLOR_HEART, Card::VALUE_THREE),
             new Card(Card::COLOR_HEART, Card::VALUE_FOUR),
-            new Card(Card::COLOR_HEART, Card::VALUE_FIVE),
-
+            new Card(Card::COLOR_HEART, Card::VALUE_JACK),
         ]);
 
         $table->addCardCollectionToDeck($collection);
@@ -426,8 +421,7 @@ class GameServiceTest extends TestCase
             new Card(Card::COLOR_HEART, Card::VALUE_TWO),
             new Card(Card::COLOR_HEART, Card::VALUE_THREE),
             new Card(Card::COLOR_HEART, Card::VALUE_FOUR),
-            new Card(Card::COLOR_HEART, Card::VALUE_FIVE),
-
+            new Card(Card::COLOR_HEART, Card::VALUE_JACK),
         ]);
 
         $table->addCardCollectionToDeck($collection);

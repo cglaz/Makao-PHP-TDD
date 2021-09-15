@@ -2,9 +2,11 @@
 
 namespace Makao\Service;
 
+use http\Encoding\Stream\Inflate;
 use Makao\Card;
 use Makao\Collection\CardCollection;
 use Makao\Exception\CardNotFoundException;
+use Makao\Player;
 
 class CardService
 {
@@ -61,7 +63,7 @@ class CardService
         return $card;
     }
 
-    private function isAction(Card $card) : bool
+    public function isAction(Card $card) : bool
     {
         return in_array($card->getValue(), [
             Card::VALUE_TWO,
@@ -72,6 +74,44 @@ class CardService
             Card::VALUE_KING,
             Card::VALUE_ACE,
         ]);
+    }
+
+    public function isRequestNeeded(Card $card) : bool
+    {
+        return in_array($card->getValue(), [
+            Card::VALUE_JACK,
+            Card::VALUE_ACE,
+        ]);
+    }
+
+    public function getTheMostOccurringNoActionPlayerCardsValue(Player $player) : ?string
+    {
+        $cards = [];
+        foreach ($player->getCards() as $card) {
+            if (!$this->isAction($card)) {
+                $cards[$card->getValue()] = isset($cards[$card->getValue()]) ? $cards[$card->getValue()] + 1 : 1;
+            }
+        }
+
+        if (empty($cards)) {
+            throw new CardNotFoundException('Player has no action cards!');
+        }
+
+        return array_keys($cards, max($cards))[0];
+    }
+
+    public function getTheMostOccurringPlayerCardsColor(Player $player) : ?string
+    {
+        $cards = [];
+        foreach ($player->getCards() as $card) {
+            $cards[$card->getColor()] = isset($cards[$card->getColor()]) ? $cards[$card->getColor()] + 1 : 1;
+        }
+
+        if (empty($cards)) {
+            throw new CardNotFoundException('Player has no cards!');
+        }
+
+        return array_keys($cards, max($cards))[0];
     }
 
 }
