@@ -114,4 +114,19 @@ class CardService
         return array_keys($cards, max($cards))[0];
     }
 
+    public function rebuildDeckFromPlayedCards(CardCollection $deck, CardCollection $playedCards) : void
+    {
+        if (0 === $playedCards->count()) {
+            throw new CardNotFoundException('Played cards collection is empty. You can not rebuild deck!');
+        }
+
+        $cards = new CardCollection();
+
+        while (1 < $playedCards->count()) {
+            $cards->add($playedCards->pickCard());
+        }
+
+        $deck->addCollection($this->shuffle($cards));
+    }
+
 }

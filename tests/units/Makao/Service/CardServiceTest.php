@@ -319,4 +319,78 @@ class CardServiceTest extends TestCase
         // Then
         $this->assertSame($actual, $expectedColor);
     }
+
+    public function testShouldRebuildCardDeckFromPlayedCardsCollectionWhenCardDeckIsEmpty()
+    {
+        // Given
+        $deck = new CardCollection();
+        $lastPlayedCard = new Card(Card::COLOR_HEART,Card::VALUE_ACE);
+        $playedCards = new CardCollection([
+            new Card(Card::COLOR_SPADE,Card::VALUE_FIVE),
+            new Card(Card::COLOR_HEART,Card::VALUE_FIVE),
+            new Card(Card::COLOR_SPADE,Card::VALUE_SIX),
+            $lastPlayedCard,
+        ]);
+
+        $shuffleCards = new CardCollection([
+            new Card(Card::COLOR_SPADE,Card::VALUE_FIVE),
+            new Card(Card::COLOR_HEART,Card::VALUE_FIVE),
+            new Card(Card::COLOR_SPADE,Card::VALUE_SIX),
+        ]);
+
+        $this->shuffleServiceMock->expects($this->once())
+            ->method('shuffle')
+            ->with($shuffleCards->toArray())
+            ->willReturn(array_reverse($shuffleCards->toArray()));
+
+        // When
+        $this->cardServiceUnderTest->rebuildDeckFromPlayedCards($deck, $playedCards);
+
+        // Then
+        $this->assertCount(3, $deck);
+        $this->assertCount(1, $playedCards);
+        $this->assertSame($lastPlayedCard, $playedCards->getLastCard());
+    }
+
+    public function testShouldThrowCardNotFoundExceptionWhenRebuildCardDeckFromPlayedCardsCollectionWithEmptyPlayedCards()
+    {
+        //Expect
+        $this->expectException(CardNotFoundException::class);
+        $this->expectExceptionMessage('Played cards collection is empty. You can not rebuild deck!');
+
+        // Given
+        $deck = new CardCollection();
+        $playedCards = new CardCollection();
+
+        // When
+        $this->cardServiceUnderTest->rebuildDeckFromPlayedCards($deck, $playedCards);
+    }
+
+
+    /**
+     * @depends testShouldAllowCreateNewCardCollection
+     *
+     * @param CardCollection $cardCollection
+     */
+    public function testShouldShuffleCardsFromPlayedCardsOnRebuildDeckFromPlayedCards(CardCollection $cardCollection)
+    {
+        // Given
+        $playedCards = clone $cardCollection;
+        $lastCard = $cardCollection->pickCard(51);
+
+        $this->shuffleServiceMock->expects($this->once())
+            ->method('shuffle')
+            ->with($cardCollection->toArray())
+            ->willReturn(array_reverse($cardCollection->toArray()));
+        $deck = new CardCollection();
+
+        // When
+        $this->cardServiceUnderTest->rebuildDeckFromPlayedCards($deck, $playedCards);
+
+        // Then
+        $this->assertCount(51, $deck);
+        $this->assertCount(1, $playedCards);
+        $this->assertSame($lastCard, $playedCards->getLastCard());
+    }
+
 }

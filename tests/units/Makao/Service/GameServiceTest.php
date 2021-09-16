@@ -444,4 +444,96 @@ class GameServiceTest extends TestCase
         $this->assertCount(4, $table->getCardDeck());
         $this->assertSame($player2, $table->getCurrentPlayer());
     }
+
+    public function testShouldRebuildCardDeckFromPlayedCardsOnRoundBeginning()
+    {
+        // Given
+        $player1 = new Player('Andy', new CardCollection([
+            new Card(Card::COLOR_SPADE, Card::VALUE_EIGHT),
+            new Card(Card::COLOR_SPADE, Card::VALUE_SEVEN),
+        ]));
+
+        $player2 = new Player('Max');
+
+        $this->gameServiceUnderTest->addPlayers([$player1, $player2]);
+
+        $table = $this->gameServiceUnderTest->getTable();
+        $playedCard = new Card(Card::COLOR_HEART, Card::VALUE_SIX);
+        $table->addPlayedCard($playedCard);
+
+        $collection = new CardCollection([
+            new Card(Card::COLOR_HEART, Card::VALUE_TWO),
+            new Card(Card::COLOR_HEART, Card::VALUE_THREE),
+            new Card(Card::COLOR_HEART, Card::VALUE_FOUR),
+            new Card(Card::COLOR_HEART, Card::VALUE_JACK),
+        ]);
+
+        $table->addCardCollectionToDeck($collection);
+
+        $this->cardSelectorMock->expects($this->never())
+            ->method('chooseCard')
+            ->with($player1, $playedCard, $table->getPlayedCardColor());
+
+        $this->actionServiceMock->expects($this->never())
+            ->method('afterCard');
+
+        $this->cardServiceMock->expects($this->once())
+            ->method('rebuildDeckFromPlayedCards')
+            ->with($table->getCardDeck(), $table->getPlayedCards());
+
+        $player1->addRoundToSkip(2);
+
+        // When
+        $this->gameServiceUnderTest->playRound();
+
+        // Then
+        $this->assertSame($playedCard, $table->getPlayedCards()->getLastCard());
+        $this->assertCount(2, $player1->getCards());
+        $this->assertCount(4, $table->getCardDeck());
+        $this->assertSame($player2, $table->getCurrentPlayer());
+    }
+
+    public function testShouldThrowGameExceptionWhenCardServiceThrowCardNotFountExceptionOnRebuildDeckFromPlayedCards()
+    {
+        // Expect
+        $notFoundException = new CardNotFoundException('Played cards collection is empty. You can not rebuild deck!');
+        $gameException = new GameException('The game needs help!', $notFoundException);
+
+        $this->expectExceptionObject($gameException);
+        $this->expectExceptionMessage('The game needs help! Issue: Played cards collection is empty. You can not rebuild deck!');
+
+        // Given
+        $player1 = new Player('Andy', new CardCollection([
+            new Card(Card::COLOR_SPADE, Card::VALUE_EIGHT),
+            new Card(Card::COLOR_SPADE, Card::VALUE_SEVEN),
+        ]));
+
+        $player2 = new Player('Max');
+
+        $this->gameServiceUnderTest->addPlayers([$player1, $player2]);
+
+        $table = $this->gameServiceUnderTest->getTable();
+        $playedCard = new Card(Card::COLOR_HEART, Card::VALUE_SIX);
+        $table->addPlayedCard($playedCard);
+
+        $collection = new CardCollection();
+
+        $table->addCardCollectionToDeck($collection);
+
+        $this->cardSelectorMock->expects($this->never())
+            ->method('chooseCard')
+            ->with($player1, $playedCard, $table->getPlayedCardColor());
+
+        $this->actionServiceMock->expects($this->never())
+            ->method('afterCard');
+
+        $this->cardServiceMock->expects($this->once())
+            ->method('rebuildDeckFromPlayedCards')
+            ->with($table->getCardDeck(), $table->getPlayedCards())
+            ->willThrowException($notFoundException);
+
+
+        // When
+        $this->gameServiceUnderTest->playRound();
+    }
 }

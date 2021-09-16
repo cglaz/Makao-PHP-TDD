@@ -98,6 +98,9 @@ class GameService
 
     public function playRound() : void
     {
+
+        $this->rebuildCardDeck();
+        $table = $this->table;
         $player = $this->table->getCurrentPlayer();
         if (!$player->canPlayRound()) {
             $this->table->finishRound();
@@ -117,6 +120,19 @@ class GameService
         } catch (CardNotFoundException $e) {
             $player->takeCards($this->table->getCardDeck());
             $this->table->finishRound();
+        }
+    }
+
+
+    private function rebuildCardDeck() : void
+    {
+        try {
+            $this->cardService->rebuildDeckFromPlayedCards(
+                $this->table->getCardDeck(),
+                $this->table->getPlayedCards(),
+            );
+        } catch (CardNotFoundException $e) {
+            throw new GameException('The game needs help!', $e);
         }
     }
 }
