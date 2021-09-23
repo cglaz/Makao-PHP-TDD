@@ -4,6 +4,9 @@
 
 Gra Karciana - MAKAO
 
+## Uruchomienie
+php cli/makao.php
+
 ## Specyfikacja projektu
 
 1. Potrzebujemy do gry stołu.
