@@ -13,19 +13,13 @@ class Table
     private $players = [];
     private $currentIndexPlayer = 0;
 
-    /**
-     * @var CardCollection
-     */
+    /** @var CardCollection */
     private $cardDeck;
 
-    /**
-     * @var CardCollection
-     */
+    /** @var CardCollection */
     private $playedCard;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $playedCardColor;
 
     public function __construct(CardCollection $cardDeck = null, CardCollection $playedCard = null)
@@ -38,12 +32,12 @@ class Table
         }
     }
 
-    public function countPlayers() : int
+    public function countPlayers()
     {
         return count($this->players);
     }
 
-    public function addPlayer(Player $player) : void
+    public function addPlayer($player) : void
     {
         if ($this->countPlayers() == self::MAX_PLAYERS) {
             throw new TooManyPlayersAtTheTableException(self::MAX_PLAYERS);
@@ -137,6 +131,4 @@ class Table
     {
         return $this->players;
     }
-
-
 }

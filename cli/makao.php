@@ -23,7 +23,19 @@ $gameService = new \Makao\Service\GameService(
     $cardActionService
 );
 
+$gameService->setLogger(new Makao\Logger\CliLogger());
+
 // setup
+echo <<<MAKAO
+
+.------..------..------..------..------.
+|M.--. ||A.--. ||K.--. ||A.--. ||O.--. |
+| (\/) || (\/) || :/\: || (\/) || :/\: |
+| :\/: || :\/: || :\/: || :\/: || :\/: |
+| '--'M|| '--'A|| '--'K|| '--'A|| '--'O|
+`------'`------'`------'`------'`------'
+
+MAKAO;
 
 $gameService->prepareCardDeck();
 

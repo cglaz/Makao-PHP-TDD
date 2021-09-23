@@ -43,7 +43,7 @@ class AutoCardSelectorService implements CardSelectorInterface
             }
         }
 
-        throw new CardNotFoundException('Player has no cards to play');
+        throw new CardNotFoundException('Player has no cards to play!');
     }
 
     private function chooseRequestForCard(Player $player, Card $card) : ?string

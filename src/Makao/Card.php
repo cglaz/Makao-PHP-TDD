@@ -32,32 +32,32 @@ class Card
         $this->value = $value;
     }
 
-    public function getValue(): string
-    {
-        return $this->value;
-    }
-
     public function getColor(): string
     {
         return $this->color;
     }
 
+    public function getValue(): string
+    {
+        return $this->value;
+    }
+
     public static function values() : array
     {
         return [
-             self::VALUE_TWO,
-             self::VALUE_THREE,
-             self::VALUE_FOUR,
-             self::VALUE_FIVE,
-             self::VALUE_SIX,
-             self::VALUE_SEVEN,
-             self::VALUE_EIGHT,
-             self::VALUE_NINE,
-             self::VALUE_TEN,
-             self::VALUE_JACK,
-             self::VALUE_QUEEN,
-             self::VALUE_KING,
-             self::VALUE_ACE,
+            self::VALUE_TWO,
+            self::VALUE_THREE,
+            self::VALUE_FOUR,
+            self::VALUE_FIVE,
+            self::VALUE_SIX,
+            self::VALUE_SEVEN,
+            self::VALUE_EIGHT,
+            self::VALUE_NINE,
+            self::VALUE_TEN ,
+            self::VALUE_JACK,
+            self::VALUE_QUEEN,
+            self::VALUE_KING,
+            self::VALUE_ACE,
         ];
     }
 
@@ -70,4 +70,11 @@ class Card
             self::COLOR_HEART,
         ];
     }
+
+    public function __toString() : string
+    {
+        return $this->value . ' ' . $this->color;
+    }
+
+
 }

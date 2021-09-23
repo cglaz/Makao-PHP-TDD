@@ -4,6 +4,7 @@ namespace Makao\Service;
 
 use Makao\Card;
 use Makao\Exception\CardNotFoundException;
+use Makao\Logger\Logger;
 use Makao\Table;
 
 class CardActionService
@@ -14,12 +15,15 @@ class CardActionService
     /** @var int */
     private $actionCount = 0;
 
+    /** @var Logger */
+    private $logger;
+
     public function __construct(Table $table)
     {
         $this->table = $table;
     }
 
-    public function afterCard(Card $card, string $request = null) : void
+    public function afterCard(Card $card, ?string $request = null) : void
     {
         $this->actionCount = 0;
         $this->table->finishRound();
@@ -54,7 +58,9 @@ class CardActionService
         $player = $this->table->getCurrentPlayer();
         try {
             $card = $player->pickCardByValue($cardValue);
+            $this->log('Player ' . $player . ': Defend with card ' . $card);
             $this->table->addPlayedCard($card);
+            $this->log('Player ' . $player . ': Finish round');
             $this->table->finishRound();
             $this->takingCards($cardValue, $cardsToGet);
         } catch (CardNotFoundException $e) {
@@ -64,7 +70,11 @@ class CardActionService
 
     private function playerTakeCards(int $count) : void
     {
-        $this->table->getCurrentPlayer()->takeCards($this->table->getCardDeck(), $count);
+        $player = $this->table->getCurrentPlayer();
+        $this->log('Player ' . $player . ': Takes ' . $this->actionCount .  ' cards');
+        $player->takeCards($this->table->getCardDeck(), $count);
+        $this->log('Player ' . $player . ': New players cards are: ' . $player->getCards());
+        $this->log('Player ' . $player . ': Finish round');
         $this->table->finishRound();
     }
 
@@ -76,24 +86,30 @@ class CardActionService
         try {
             $card = $player->pickCardByValue(Card::VALUE_FOUR);
             $this->table->addPlayedCard($card);
+            $this->log('Player ' . $player . ': Finish round');
             $this->table->finishRound();
             $this->skipRound();
         } catch (CardNotFoundException $e) {
             $player->addRoundToSkip($this->actionCount - 1);
+            $this->log('Player ' . $player . ': will skip ' . ($this->actionCount - 1) . ' rounds');
             $this->table->finishRound();
+            $this->log('Player ' . $player . ': Finish round');
         }
     }
 
     private function requestingCardValue(string $cardValue) : void
     {
+        $this->log('Requested card: ' . $cardValue);
         $iteration = $this->table->countPlayers();
         for ($i = 0; $i < $iteration; $i++) {
             $player = $this->table->getCurrentPlayer();
 
             try {
                 $cards = $player->pickCardsByValue($cardValue);
+                $this->log('Player ' . $player . ': Pick cards ' . $cards);
                 $this->table->addPlayedCards($cards);
             } catch (CardNotFoundException $e) {
+                $this->log('Player ' . $player . ': Takes card');
                 $player->takeCards($this->table->getCardDeck());
             }
             $this->table->finishRound();
@@ -120,6 +136,7 @@ class CardActionService
     {
         try {
             $card = $this->table->getCurrentPlayer()->pickCardByValueAndColor(Card::VALUE_KING, Card::COLOR_SPADE);
+            $this->log('Player ' . $this->table->getCurrentPlayer() . ': Defend by king spade');
             $this->table->addPlayedCard($card);
             $this->table->finishRound();
             $this->afterKing(Card::COLOR_SPADE);
@@ -131,9 +148,9 @@ class CardActionService
     private function afterKingSpade() : void
     {
         $this->table->backRound();
-
         try {
             $card = $this->table->getPreviousPlayer()->pickCardByValueAndColor(Card::VALUE_KING, Card::COLOR_HEART);
+            $this->log('Player ' . $this->table->getCurrentPlayer() . ': Defend by king heart');
             $this->table->addPlayedCard($card);
             $this->afterKing(Card::COLOR_HEART);
         } catch (CardNotFoundException $e) {
@@ -145,5 +162,19 @@ class CardActionService
     private function changePlayedColorCardOnTable(string $color) : void
     {
         $this->table->changePlayedCardColor($color);
+    }
+
+    public function setLogger(Logger $logger) : self
+    {
+        $this->logger = $logger;
+
+        return $this;
+    }
+
+    public function log($message) : void
+    {
+        if ($this->logger instanceof Logger) {
+            $this->logger->log($message);
+        }
     }
 }

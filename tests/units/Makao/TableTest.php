@@ -6,8 +6,8 @@ use Makao\Card;
 use Makao\Collection\CardCollection;
 use Makao\Exception\CardNotFoundException;
 use Makao\Exception\TooManyPlayersAtTheTableException;
-use Makao\Table;
 use Makao\Player;
+use Makao\Table;
 use PHPUnit\Framework\TestCase;
 
 class TableTest extends TestCase
@@ -15,13 +15,12 @@ class TableTest extends TestCase
     /** @var Table */
     private $tableUnderTest;
 
-    public function setUp(): void
+    public function setUp() : void
     {
-       $this->tableUnderTest = new Table();
+        $this->tableUnderTest = new Table();
     }
 
-    public function testShouldCreateEmptyTable()
-    {
+    public function testShouldCreateEmptyTable() {
         // Given
         $expected = 0;
 
@@ -32,9 +31,8 @@ class TableTest extends TestCase
         $this->assertSame($expected, $actual);
     }
 
-    public function testShouldAddOnePlayerToTable()
-    {
-        // Given - Zmienne wejściowe
+    public function testShouldAddOnePlayerToTable() {
+        // Given
         $expected = 1;
         $player = new Player('Andy');
 
@@ -45,37 +43,34 @@ class TableTest extends TestCase
         // Then
         $this->assertSame($expected, $actual);
     }
-    
-    public function testShouldReturnCountWhenIAddManyPlayers()
-    {
-        // Given - Zmienne wejściowe
+
+    public function testShouldReturnCountWhenIAddManyPlayers() {
+        // Given
         $expected = 2;
 
         // When
         $this->tableUnderTest->addPlayer(new Player('Andy'));
-        $this->tableUnderTest->addPlayer(new Player('Andys'));
+        $this->tableUnderTest->addPlayer(new Player('Tom'));
         $actual = $this->tableUnderTest->countPlayers();
 
         // Then
         $this->assertSame($expected, $actual);
     }
 
-    public function testShouldThrowTooManyPlayersAtTheTableExceptionWhenITryAddMoreThanFourPlayers()
-    {
+    public function testShouldThrowTooManyPlayersAtTheTableExceptionWhenITryAddMoreThanFourPlayers() {
         // Expect
         $this->expectException(TooManyPlayersAtTheTableException::class);
-        $this->expectExceptionMessage('Max capacity is 4 players');
+        $this->expectExceptionMessage('Max capacity is 4 players!');
 
         // When
         $this->tableUnderTest->addPlayer(new Player('Andy'));
-        $this->tableUnderTest->addPlayer(new Player('Andys'));
-        $this->tableUnderTest->addPlayer(new Player('Andyss'));
-        $this->tableUnderTest->addPlayer(new Player('Andysss'));
-        $this->tableUnderTest->addPlayer(new Player('Andyssss'));
+        $this->tableUnderTest->addPlayer(new Player('Tom'));
+        $this->tableUnderTest->addPlayer(new Player('Max'));
+        $this->tableUnderTest->addPlayer(new Player('John'));
+        $this->tableUnderTest->addPlayer(new Player('Michael'));
     }
-    
-    public function testShouldReturnEmptyCardCollectionForPlayedCard()
-    {
+
+    public function testShouldReturnEmptyCardCollectionForPlayedCard() {
         // When
         $actual = $this->tableUnderTest->getPlayedCards();
 
@@ -83,9 +78,8 @@ class TableTest extends TestCase
         $this->assertInstanceOf(CardCollection::class, $actual);
         $this->assertCount(0, $actual);
     }
-    
-    public function testShouldPutCardDeckOnTable()
-    {
+
+    public function testShouldPutCardDeckOnTable() {
         // Given
         $cards = new CardCollection([
             new Card(Card::COLOR_DIAMOND, Card::VALUE_KING)
@@ -94,7 +88,7 @@ class TableTest extends TestCase
         // When
         $table = new Table($cards);
         $actual = $table->getCardDeck();
-            
+
         // Then
         $this->assertSame($cards, $actual);
     }
@@ -104,7 +98,7 @@ class TableTest extends TestCase
         // Given
         $cardCollection = new CardCollection([
             new Card(Card::COLOR_DIAMOND, Card::VALUE_KING),
-            new Card(Card::COLOR_SPADE, Card::VALUE_ACE),
+            new Card(Card::COLOR_HEART, Card::VALUE_EIGHT),
         ]);
 
         // When
@@ -113,13 +107,13 @@ class TableTest extends TestCase
         // Then
         $this->assertEquals($cardCollection, $actual->getCardDeck());
     }
-    
+
     public function testShouldReturnCurrentPlayer()
     {
         // Given
         $player1 = new Player('Andy');
         $player2 = new Player('Tom');
-        $player3 = new Player('Ed');
+        $player3 = new Player('Jack');
 
         $this->tableUnderTest->addPlayer($player1);
         $this->tableUnderTest->addPlayer($player2);
@@ -127,7 +121,7 @@ class TableTest extends TestCase
 
         // When
         $actual = $this->tableUnderTest->getCurrentPlayer();
-            
+
         // Then
         $this->assertSame($player1, $actual);
     }
@@ -137,7 +131,7 @@ class TableTest extends TestCase
         // Given
         $player1 = new Player('Andy');
         $player2 = new Player('Tom');
-        $player3 = new Player('Ed');
+        $player3 = new Player('Jack');
 
         $this->tableUnderTest->addPlayer($player1);
         $this->tableUnderTest->addPlayer($player2);
@@ -149,30 +143,33 @@ class TableTest extends TestCase
         // Then
         $this->assertSame($player2, $actual);
     }
+
     public function testShouldReturnPreviousPlayer()
     {
         // Given
         $player1 = new Player('Andy');
         $player2 = new Player('Tom');
-        $player3 = new Player('Ed');
+        $player3 = new Player('Jack');
+        $player4 = new Player('Bill');
 
         $this->tableUnderTest->addPlayer($player1);
         $this->tableUnderTest->addPlayer($player2);
         $this->tableUnderTest->addPlayer($player3);
+        $this->tableUnderTest->addPlayer($player4);
 
         // When
         $actual = $this->tableUnderTest->getPreviousPlayer();
 
         // Then
-        $this->assertSame($player3, $actual);
+        $this->assertSame($player4, $actual);
     }
-
+    
     public function testShouldSwitchCurrentPlayerWhenRoundFinished()
     {
         // Given
         $player1 = new Player('Andy');
         $player2 = new Player('Tom');
-        $player3 = new Player('Ed');
+        $player3 = new Player('Jack');
 
         $this->tableUnderTest->addPlayer($player1);
         $this->tableUnderTest->addPlayer($player2);
@@ -207,7 +204,7 @@ class TableTest extends TestCase
         // Given
         $player1 = new Player('Andy');
         $player2 = new Player('Tom');
-        $player3 = new Player('Ed');
+        $player3 = new Player('Jack');
 
         $this->tableUnderTest->addPlayer($player1);
         $this->tableUnderTest->addPlayer($player2);
@@ -249,11 +246,12 @@ class TableTest extends TestCase
         // Then
         $this->assertEquals(Card::COLOR_CLUB, $this->tableUnderTest->getPlayedCardColor());
     }
+
     public function testShouldReturnPlayedCardsColorSetByAddPlayedCard()
     {
-       $collection = new CardCollection([
+        $collection = new CardCollection([
             new Card(Card::COLOR_CLUB, Card::VALUE_FIVE),
-            new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE)
+            new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE),
         ]);
 
         // When
@@ -262,6 +260,4 @@ class TableTest extends TestCase
         // Then
         $this->assertEquals(Card::COLOR_DIAMOND, $this->tableUnderTest->getPlayedCardColor());
     }
-
-
 }

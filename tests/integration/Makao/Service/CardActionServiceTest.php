@@ -385,7 +385,7 @@ class CardActionServiceTest extends TestCase
 
     public function testShouldNotRunAnyActionForOtherKings()
     {
-        //Given
+        // Given
         $card = new Card(Card::COLOR_DIAMOND, Card::VALUE_KING);
 
         // When
@@ -400,7 +400,7 @@ class CardActionServiceTest extends TestCase
 
     public function testShouldNotRunAnyActionForAnyNoActionCard()
     {
-        //Given
+        // Given
         $card = new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE);
 
         // When
@@ -417,14 +417,13 @@ class CardActionServiceTest extends TestCase
     {
         // Given
         $requestColor = Card::COLOR_HEART;
-        $card = new Card(Card::COLOR_DIAMOND, Card::VALUE_ACE);
+        $card = new Card(Card::COLOR_SPADE, Card::VALUE_ACE);
 
-        // When && Then
+        // When & Then
         $this->assertEquals(Card::COLOR_SPADE, $this->table->getPlayedCardColor());
 
         $this->serviceUnderTest->afterCard($card, $requestColor);
 
         $this->assertEquals(Card::COLOR_HEART, $this->table->getPlayedCardColor());
-
     }
 }

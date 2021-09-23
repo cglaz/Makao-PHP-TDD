@@ -10,8 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class PlayerTest extends TestCase
 {
-    public function testShouldWritePlayerName()
-    {
+    public function testShouldWritePlayerName() {
         // Given
         $player = new Player('Andy');
 
@@ -24,8 +23,7 @@ class PlayerTest extends TestCase
         $this->assertEquals('Andy', $actual);
     }
 
-    public function testShouldReturnPlayerCardCollcetion()
-    {
+    public function testShouldReturnPlayerCardCollection() {
         // Given
         $cardCollection = new CardCollection([
             new Card(Card::COLOR_HEART, Card::VALUE_ACE),
@@ -39,11 +37,11 @@ class PlayerTest extends TestCase
         $this->assertSame($cardCollection, $actual);
     }
 
-    public function testShouldAllowPlayerTakeCardFromDeck()
-    {
+    public function testShouldAllowPlayerTakeCardFromDeck() {
         // Given
         $card = new Card(Card::COLOR_HEART, Card::VALUE_ACE);
         $cardCollection = new CardCollection([$card]);
+
         $player = new Player('Andy');
 
         // When
@@ -52,11 +50,11 @@ class PlayerTest extends TestCase
         // Then
         $this->assertCount(0, $cardCollection);
         $this->assertCount(1, $actual);
+
         $this->assertSame($card, $actual[0]);
     }
-    
-    public function testShouldAllowPlayerTakeManyCardsFromCardCollection()
-    {
+
+    public function testShouldAllowPlayerTakeManyCardsFromCardCollection() {
         // Given
         $firstCard = new Card(Card::COLOR_HEART, Card::VALUE_ACE);
         $secondCard = new Card(Card::COLOR_SPADE, Card::VALUE_EIGHT);
@@ -79,13 +77,13 @@ class PlayerTest extends TestCase
 
     public function testShouldAllowPickChosenCardFromPlayerCardCollection()
     {
-        // Given
         $firstCard = new Card(Card::COLOR_HEART, Card::VALUE_ACE);
         $secondCard = new Card(Card::COLOR_SPADE, Card::VALUE_EIGHT);
         $thirdCard = new Card(Card::COLOR_DIAMOND, Card::VALUE_KING);
         $cardCollection = new CardCollection([$firstCard, $secondCard, $thirdCard]);
 
-        $player = new Player('Andy',$cardCollection);
+        // Given
+        $player = new Player('Andy', $cardCollection);
 
         // When
         $actual = $player->pickCard(2);
@@ -94,8 +92,7 @@ class PlayerTest extends TestCase
         $this->assertSame($thirdCard, $actual);
     }
 
-    public function testShouldAllowPlayerSaysMakao()
-    {
+    public function testShouldAllowPlayerSaysMakao() {
         // Given
         $player = new Player('Andy');
 
@@ -113,23 +110,23 @@ class PlayerTest extends TestCase
         $this->expectExceptionMessage('Player has not card with value 2');
 
         // Given
-        $player = new Player('Andyy');
+        $player = new Player('Andy');
 
         // When
         $player->pickCardByValue(Card::VALUE_TWO);
     }
-    
+
     public function testShouldReturnPickCardByValueWhenPlayerHasCorrectCard()
     {
         // Given
-        $card =  new Card(Card::COLOR_HEART, Card::VALUE_TWO);
-        $player = new Player('Andyy', new CardCollection([
+        $card = new Card(Card::COLOR_HEART, Card::VALUE_TWO);
+        $player = new Player('Andy', new CardCollection([
             $card
         ]));
 
         // When
         $actual = $player->pickCardByValue(Card::VALUE_TWO);
-            
+
         // Then
         $this->assertSame($card, $actual);
     }
@@ -137,8 +134,8 @@ class PlayerTest extends TestCase
     public function testShouldReturnFirstCardByPickCardByValueWhenPlayerHasMoreCorrectCard()
     {
         // Given
-        $card =  new Card(Card::COLOR_HEART, Card::VALUE_TWO);
-        $player = new Player('Andyy', new CardCollection([
+        $card = new Card(Card::COLOR_HEART, Card::VALUE_TWO);
+        $player = new Player('Andy', new CardCollection([
             $card,
             new Card(Card::COLOR_SPADE, Card::VALUE_TWO)
         ]));
@@ -149,15 +146,15 @@ class PlayerTest extends TestCase
         // Then
         $this->assertSame($card, $actual);
     }
-    
+
     public function testShouldReturnTrueWhenPlayerCanPlayRound()
     {
         // Given
-        $player = new Player('Andyy');
-            
+        $player = new Player('Andy');
+
         // When
         $actual = $player->canPlayRound();
-            
+
         // Then
         $this->assertTrue($actual);
     }
@@ -165,7 +162,7 @@ class PlayerTest extends TestCase
     public function testShouldReturnFalseWhenPlayerCanNotPlayRound()
     {
         // Given
-        $player = new Player('Andyy');
+        $player = new Player('Andy');
 
         // When
         $player->addRoundToSkip();
@@ -177,7 +174,7 @@ class PlayerTest extends TestCase
     public function testShouldSkipManyRoundsAndBackToPlayAfter()
     {
         // Given
-        $player = new Player('Andyy');
+        $player = new Player('Andy');
 
         // When & Then
         $this->assertTrue($player->canPlayRound());
@@ -202,7 +199,7 @@ class PlayerTest extends TestCase
         $this->expectExceptionMessage('Player has not card with value 2');
 
         // Given
-        $player = new Player('Andyy');
+        $player = new Player('Andy');
 
         // When
         $player->pickCardsByValue(Card::VALUE_TWO);
@@ -211,11 +208,10 @@ class PlayerTest extends TestCase
     public function testShouldReturnPickCardsByValueWhenPlayerHasCorrectCard()
     {
         // Given
-        $cardCollection =  new CardCollection([
+        $cardCollection = new CardCollection([
             new Card(Card::COLOR_HEART, Card::VALUE_TWO)
         ]);
-
-        $player = new Player('Andyy', clone $cardCollection);
+        $player = new Player('Andy', clone $cardCollection);
 
         // When
         $actual = $player->pickCardsByValue(Card::VALUE_TWO);
@@ -223,15 +219,15 @@ class PlayerTest extends TestCase
         // Then
         $this->assertEquals($cardCollection, $actual);
     }
-    public function testShouldReturnFirstCardByPickCardsByValueWhenPlayerHasMoreCorrectCard()
+
+    public function testShouldReturnFirstCardByPicksCardByValueWhenPlayerHasMoreCorrectCard()
     {
         // Given
         $cardCollection = new CardCollection([
             new Card(Card::COLOR_HEART, Card::VALUE_TWO),
-            new Card(Card::COLOR_SPADE, Card::VALUE_TWO),
+            new Card(Card::COLOR_SPADE, Card::VALUE_TWO)
         ]);
-
-        $player = new Player('Andyy', clone $cardCollection);
+        $player = new Player('Andy', clone $cardCollection);
 
         // When
         $actual = $player->pickCardsByValue(Card::VALUE_TWO);
@@ -247,7 +243,7 @@ class PlayerTest extends TestCase
         $this->expectExceptionMessage('Player has not card with value 2 and color heart');
 
         // Given
-        $player = new Player('Andyy');
+        $player = new Player('Andy');
 
         // When
         $player->pickCardByValueAndColor(Card::VALUE_TWO, Card::COLOR_HEART);
@@ -256,8 +252,8 @@ class PlayerTest extends TestCase
     public function testShouldReturnPickCardByValueAndColorWhenPlayerHasCorrectCard()
     {
         // Given
-        $card =  new Card(Card::COLOR_HEART, Card::VALUE_TWO);
-        $player = new Player('Andyy', new CardCollection([
+        $card = new Card(Card::COLOR_HEART, Card::VALUE_TWO);
+        $player = new Player('Andy', new CardCollection([
             $card
         ]));
 
@@ -267,5 +263,4 @@ class PlayerTest extends TestCase
         // Then
         $this->assertSame($card, $actual);
     }
-
 }

@@ -6,6 +6,7 @@ use Makao\Card;
 use Makao\Collection\CardCollection;
 use Makao\Exception\CardNotFoundException;
 use Makao\Exception\GameException;
+use Makao\Logger\Logger;
 use Makao\Player;
 use Makao\SelectedCard;
 use Makao\Service\CardActionService;
@@ -493,7 +494,7 @@ class GameServiceTest extends TestCase
         $this->assertSame($player2, $table->getCurrentPlayer());
     }
 
-    public function testShouldThrowGameExceptionWhenCardServiceThrowCardNotFountExceptionOnRebuildDeckFromPlayedCards()
+    public function testShouldThrowGameExceptionWhenCardServiceThrowCardNotFoundExceptionOnRebuildDeckFromPlayedCards()
     {
         // Expect
         $notFoundException = new CardNotFoundException('Played cards collection is empty. You can not rebuild deck!');
@@ -532,8 +533,34 @@ class GameServiceTest extends TestCase
             ->with($table->getCardDeck(), $table->getPlayedCards())
             ->willThrowException($notFoundException);
 
-
         // When
         $this->gameServiceUnderTest->playRound();
+    }
+
+    public function testShouldLogMessage()
+    {
+        // Given
+        $message = 'MESSAGE';
+        $loggerMock = $this->prophesize(Logger::class);
+
+        $loggerMock->log($message)->shouldBeCalled();
+
+        $this->gameServiceUnderTest->setLogger($loggerMock->reveal());
+
+        // When
+        $this->gameServiceUnderTest->log($message);
+
+    }
+
+    public function testShouldNotLogMessageWithoutLogger()
+    {
+        // Given
+        $message = 'MESSAGE';
+        $loggerMock = $this->prophesize(Logger::class);
+
+        $loggerMock->log($message)->shouldNotBeCalled();
+
+        // When
+        $this->gameServiceUnderTest->log($message);
     }
 }

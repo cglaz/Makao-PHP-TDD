@@ -8,6 +8,7 @@ use Makao\Exception\CardNotFoundException;
 class Player
 {
     const MAKAO = 'Makao';
+
     /**
      * @var string
      */
@@ -18,9 +19,7 @@ class Player
      */
     private $cardCollection;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     private $roundToSkip = 0;
 
     public function __construct(string $name, CardCollection $cardCollection = null)
@@ -55,7 +54,7 @@ class Player
 
     public function sayMakao() : string
     {
-        return  self::MAKAO;
+        return self::MAKAO;
     }
 
     public function pickCardByValue(string $value) : Card
@@ -66,12 +65,12 @@ class Player
     public function pickCardByValueAndColor(string $value, string $color = null) : Card
     {
         foreach ($this->cardCollection as $index => $card) {
-            if ($value === $card->getValue() && (is_null($color)) || $color === $card->getColor()) {
+            if ($value === $card->getValue() && (is_null($color) || $color === $card->getColor())) {
                 return $this->pickCard($index);
             }
         }
 
-        $message = 'Player has not card with value '.$value;
+        $message = 'Player has not card with value ' . $value;
         if (!is_null($color)) {
             $message .= ' and color ' . $color;
         }
@@ -81,7 +80,7 @@ class Player
 
     public function pickCardsByValue(string $value) : CardCollection
     {
-       $collection = new CardCollection();
+        $collection = new CardCollection();
 
         try {
             while ($card = $this->pickCardByValue($value)) {
@@ -92,6 +91,7 @@ class Player
                 throw $e;
             }
         }
+
         return $collection;
     }
 
@@ -108,13 +108,14 @@ class Player
     public function addRoundToSkip(int $rounds = 1) : self
     {
         $this->roundToSkip += $rounds;
+
         return $this;
     }
 
     public function skipRound() : self
     {
         --$this->roundToSkip;
+
         return $this;
     }
-
 }

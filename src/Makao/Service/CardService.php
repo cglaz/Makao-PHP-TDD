@@ -2,7 +2,6 @@
 
 namespace Makao\Service;
 
-use http\Encoding\Stream\Inflate;
 use Makao\Card;
 use Makao\Collection\CardCollection;
 use Makao\Exception\CardNotFoundException;
@@ -35,7 +34,6 @@ class CardService
 
     public function shuffle(CardCollection $cardCollection) : CardCollection
     {
-
         return new CardCollection(
             $this->shuffleService->shuffle($cardCollection->toArray())
         );
@@ -46,7 +44,7 @@ class CardService
         $firstCard = null;
         $card = $collection->pickCard();
 
-        while($this->isAction($card) && $firstCard !== $card) {
+        while ($this->isAction($card) && $firstCard !== $card) {
             $collection->add($card);
 
             if (is_null($firstCard)) {
@@ -57,7 +55,7 @@ class CardService
         }
 
         if ($this->isAction($card)) {
-        throw new CardNotFoundException('No regular cards in colection');
+            throw new CardNotFoundException('No regular cards in collection');
         }
 
         return $card;
@@ -92,7 +90,6 @@ class CardService
                 $cards[$card->getValue()] = isset($cards[$card->getValue()]) ? $cards[$card->getValue()] + 1 : 1;
             }
         }
-
         if (empty($cards)) {
             throw new CardNotFoundException('Player has no action cards!');
         }
@@ -121,12 +118,10 @@ class CardService
         }
 
         $cards = new CardCollection();
-
         while (1 < $playedCards->count()) {
             $cards->add($playedCards->pickCard());
         }
 
         $deck->addCollection($this->shuffle($cards));
     }
-
 }
